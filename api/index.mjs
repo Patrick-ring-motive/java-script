@@ -18,7 +18,6 @@ http.createServer(onRequest).listen(3000);
 let skipHeaders=['content-length','content-encoding'];
 
 async function onRequest(req, res) {
- /* console.log(req.url)*/
   let localhost = req.headers['Host'];
   
   if (req.url == '/ping') {
@@ -38,8 +37,6 @@ async function onRequest(req, res) {
     .replace('.jsml','.json')
     .replace('.whtml','.html');
 
-  
-
   let reqHeaders = {}
   for (const property in req.headers) {
     try {
@@ -50,7 +47,7 @@ async function onRequest(req, res) {
   }
   
   reqHeaders.host = hostTarget;
-  reqHeaders.referer = 'https://'+hostTarget;
+  reqHeaders.referer = `https://${hostTarget}`;
 
   
 
@@ -65,13 +62,10 @@ async function onRequest(req, res) {
       method: req.method,
       headers: reqHeaders
     };
-    /* fetch throws an error if you send a body with a GET request even if it is empty */
-    if ((req.method != 'GET') && (req.method != 'HEAD') && (bdy.length > 0)) {
-      options = {
-        method: req.method,
-        headers: reqHeaders,
-        body: bdy
-      };
+    /* fetch throws an error if you send a body with a GET request even if it is empty. 
+        Length check is 4 because empty is sometimes coerced to null.*/
+    if ((!req.method.match(/GET|HEAD/)) && (bdy.length > 4)) {
+      options.body=bdy
     }
     /* finish copying over the other parts of the request */
 
