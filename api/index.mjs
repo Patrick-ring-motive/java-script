@@ -13,8 +13,6 @@ const hostTarget = 'nodejs.org';
 
 http.createServer(onRequest).listen(3000);
 
-
-
 let skipHeaders=['content-length','content-encoding'];
 
 async function onRequest(req, res) {
@@ -27,11 +25,7 @@ async function onRequest(req, res) {
   if(req.url.startsWith('/searchfetch/')){
     return res.end(await searchfetch(req.url.split('/searchfetch/')[1]));
   }
-  if(req.url.startsWith('/_root/')){req.url=req.url.replace('/_root/','/');}
-  else if(req.url.startsWith('/_root')){req.url=req.url.replace('/_root','/');}
-
-  //req.url=req.url.replace('index.json','en.json');
-
+  req.url=req.url.replace(/\/_root(|\/)/,'/');
 
   let path = req.url.replace('*', '')
     .replace('.jsml','.json')
@@ -70,11 +64,11 @@ async function onRequest(req, res) {
     /* finish copying over the other parts of the request */
 
     /* fetch from your desired target */
-    let response = await duofetch('https://' + hostTarget + path, options);
+    let response = await duofetch(`https://${hostTarget}${path}`, options);
 
     /* if there is a problem try redirecting to the original */
     if (response.status > 399) {
-      res.setHeader('location', 'https://' + hostTarget + path);
+      res.setHeader('location', `https://${hostTarget}${path}`);
       res.statusCode = 302;
       return res.end();
     }
